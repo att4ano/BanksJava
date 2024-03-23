@@ -5,11 +5,11 @@ package presentation.console;
  */
 public abstract class Scenario
 {
-    protected final String _name;
+    protected final String name;
 
     protected Scenario(String name)
     {
-        _name = name;
+        this.name = name;
     }
 
     /**
@@ -21,6 +21,6 @@ public abstract class Scenario
      * @return представление сценария в виде строки
      */
     public String toString() {
-        return _name;
+        return name;
     }
 }

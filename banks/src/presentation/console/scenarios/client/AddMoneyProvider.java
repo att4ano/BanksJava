@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер сценария ускорения времени
  */
 public class AddMoneyProvider implements IScenarioProvider {
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public AddMoneyProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class AddMoneyProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new AddMoneyScenario(_clientService);
+        scenario = new AddMoneyScenario(clientService);
         return scenario;
     }
 }

@@ -1,21 +1,18 @@
-package presentation.console.scenarios.admin;
+package presentation.console.scenarios.client;
 
 import application.application.CurrentSession;
-import application.contracts.ICentralBankService;
+import application.contracts.IClientService;
 import application.contracts.ICurrentUserManager;
 import org.jetbrains.annotations.Nullable;
 import presentation.console.IScenarioProvider;
 import presentation.console.Scenario;
 
-/**
- * провайдер сценария выплат
- */
-public class MakePaymentProvider implements IScenarioProvider {
-    private final ICentralBankService centralBankService;
+public class SubscribeToBankProvider implements IScenarioProvider {
+    private final IClientService clientService;
     private final ICurrentUserManager currentUserManager;
 
-    public MakePaymentProvider(ICentralBankService centralBankService, ICurrentUserManager currentUserManager) {
-        this.centralBankService = centralBankService;
+    public SubscribeToBankProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
+        this.clientService = clientService;
         this.currentUserManager = currentUserManager;
     }
 
@@ -25,10 +22,10 @@ public class MakePaymentProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new MakePaymentScenario(centralBankService);
+        scenario = new SubscribeToBankScenario(clientService);
         return scenario;
     }
 }

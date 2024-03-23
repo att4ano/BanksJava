@@ -15,29 +15,30 @@ import java.util.UUID;
 public class CreditAccount extends Account {
     public CreditAccount(UUID accountId, Bank bank, Client client, BigDecimal moneyAmount) {
         super(accountId, bank, client);
+        this.moneyAmount = moneyAmount;
     }
 
     /**
-     * @param moneyAmount количество денег, которые надо добавить
+     * @param newMoneyAmount количество денег, которые надо добавить
      */
     @Override
-    public void addMoney(@NotNull BigDecimal moneyAmount) {
-        if (moneyAmount.compareTo(_bank.get_limit()) >= 0) {
-            _moneyAmount = _moneyAmount.add(moneyAmount);
+    public void addMoney(@NotNull BigDecimal newMoneyAmount) {
+        if (moneyAmount.compareTo(bank.getLimit()) >= 0) {
+            moneyAmount = moneyAmount.add(newMoneyAmount);
         } else {
-            _moneyAmount = _moneyAmount.add(moneyAmount.multiply(BigDecimal.valueOf(_bank.get_commission() + 1)));
+            moneyAmount = moneyAmount.add(newMoneyAmount.multiply(BigDecimal.valueOf(bank.getCommission() + 1)));
         }
     }
 
     /**
-     * @param moneyAmount количество денег
+     * @param newMoneyAmount количество денег
      */
     @Override
-    public void withdrawMoney(@NotNull BigDecimal moneyAmount) {
-        if (moneyAmount.compareTo(_bank.get_limit()) >= 0) {
-            _moneyAmount = _moneyAmount.subtract(moneyAmount);
+    public void withdrawMoney(@NotNull BigDecimal newMoneyAmount) {
+        if (moneyAmount.compareTo(bank.getLimit()) >= 0) {
+            moneyAmount = moneyAmount.subtract(newMoneyAmount);
         } else {
-            _moneyAmount = _moneyAmount.subtract(moneyAmount.multiply(BigDecimal.valueOf(_bank.get_commission() + 1)));
+            moneyAmount = moneyAmount.subtract(newMoneyAmount.multiply(BigDecimal.valueOf(bank.getCommission() + 1)));
         }
     }
 
@@ -46,6 +47,6 @@ public class CreditAccount extends Account {
      */
     @Override
     public String toString() {
-        return "Id: " + _id.toString() + " | " + "Type: Credit" + " | " + "Bank name: " + _bank.get_name() + " | " + "Money amount: " + _moneyAmount.toString();
+        return "Id: " + id.toString() + " | " + "Type: Credit" + " | " + "Bank name: " + bank.getName() + " | " + "Money amount: " + moneyAmount.toString();
     }
 }

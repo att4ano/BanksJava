@@ -21,8 +21,8 @@ public class TransactionFactory implements ITransactionFactory {
     @Override
     public Transaction createAddTransaction(Account account, BigDecimal moneyAmount) {
         return AddMoneyTransaction.builder()
-                ._account(account)
-                ._moneyAmount(moneyAmount)
+                .account(account)
+                .moneyAmount(moneyAmount)
                 .build();
     }
 
@@ -34,8 +34,8 @@ public class TransactionFactory implements ITransactionFactory {
     @Override
     public Transaction createWithdrawTransaction(Account account, BigDecimal moneyAmount) {
         return WithdrawMoneyTransaction.builder()
-                ._account(account)
-                ._moneyAmount(moneyAmount)
+                .account(account)
+                .moneyAmount(moneyAmount)
                 .build();
     }
 
@@ -48,9 +48,9 @@ public class TransactionFactory implements ITransactionFactory {
     @Override
     public Transaction createTransferTransaction(Account fromAccount, Account toAccount, BigDecimal moneyAmount) {
         return TransferMoneyTransaction.builder()
-                ._fromAccount(fromAccount)
-                ._toAccount(toAccount)
-                ._moneyAmount(moneyAmount)
+                .fromAccount(fromAccount)
+                .toAccount(toAccount)
+                .moneyAmount(moneyAmount)
                 .build();
     }
 }

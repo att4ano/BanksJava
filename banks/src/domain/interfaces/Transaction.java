@@ -1,6 +1,7 @@
 package domain.interfaces;
 
 import domain.models.Client;
+import domain.models.transactions.TransactionStatus;
 import lombok.Data;
 
 import java.util.UUID;
@@ -10,10 +11,11 @@ import java.util.UUID;
  */
 @Data
 public abstract class Transaction {
-    protected final UUID _id;
+    protected final UUID id;
+    protected TransactionStatus status;
 
     protected Transaction(UUID id) {
-        _id = id;
+        this.id = id;
     }
 
     public abstract void execute(Client client);

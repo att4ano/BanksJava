@@ -10,10 +10,10 @@ import java.util.Scanner;
  * Сценарий обновления информации
  */
 public class UpdateInformationScenario extends Scenario {
-    private final IBankService _bankService;
+    private final IBankService bankService;
     public UpdateInformationScenario(IBankService bankService) {
         super("Update information");
-        _bankService = bankService;
+        this.bankService = bankService;
     }
 
     /**
@@ -28,12 +28,12 @@ public class UpdateInformationScenario extends Scenario {
         ServiceResult serviceResult = null;
 
         if (info.equals("Interest")) {
-            serviceResult = _bankService.updateInterest(newValue);
+            serviceResult = bankService.updateInterest(newValue);
         } else if (info.equals("Commission")) {
-            serviceResult = _bankService.updateCommission(newValue);
+            serviceResult = bankService.updateCommission(newValue);
         }
         if (serviceResult != null)
-            System.out.println(serviceResult.get_message());
+            System.out.println(serviceResult.getMessage());
 
         scanner.nextLine();
         System.out.print("\033[H\033[2J");

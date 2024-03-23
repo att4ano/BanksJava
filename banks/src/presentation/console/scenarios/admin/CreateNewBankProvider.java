@@ -12,12 +12,12 @@ import presentation.console.scenarios.login.LoginAsAdminScenario;
  * провайдер сценария создания банка
  */
 public class CreateNewBankProvider implements IScenarioProvider {
-    private final ICentralBankService _centralBankService;
-    private final ICurrentUserManager _currentUserManager;
+    private final ICentralBankService centralBankService;
+    private final ICurrentUserManager currentUserManager;
 
     public CreateNewBankProvider(ICentralBankService centralBankService, ICurrentUserManager currentUserManager) {
-        _centralBankService = centralBankService;
-        _currentUserManager = currentUserManager;
+        this.centralBankService = centralBankService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -26,10 +26,10 @@ public class CreateNewBankProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return null;
 
-        scenario = new CreateNewBankScenario(_centralBankService);
+        scenario = new CreateNewBankScenario(centralBankService);
         return scenario;
     }
 }

@@ -9,11 +9,11 @@ import java.util.UUID;
  */
 @Data
 public class Admin {
-    private final UUID _id;
-    private final String _password;
+    private final UUID id;
+    private final String password;
 
     public Admin(UUID id, String password) {
-        _id = id;
-        _password = password;
+        this.password = password;
+        this.id = id;
     }
 }

@@ -5,6 +5,7 @@ import domain.models.accounts.Account;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -12,20 +13,20 @@ import java.util.UUID;
  */
 public class AccountRepository implements IAccountRepository
 {
-    private final HashSet<Account> _accounts;
+    private final Set<Account> accounts;
 
     public AccountRepository(HashSet<Account> accounts)
     {
-        _accounts = accounts;
+        this.accounts = accounts;
     }
 
     /**
      * @return возвращает все счета
      */
     @Override
-    public HashSet<Account> getAllAccounts()
+    public Set<Account> getAllAccounts()
     {
-        return _accounts;
+        return accounts;
     }
 
     /**
@@ -34,8 +35,8 @@ public class AccountRepository implements IAccountRepository
      */
     @Override
     public @Nullable Account findAccount(UUID id) {
-        return _accounts.stream()
-                .filter(account -> account.get_id().equals(id))
+        return accounts.stream()
+                .filter(account -> account.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -47,6 +48,6 @@ public class AccountRepository implements IAccountRepository
     @Override
     public void addNewAccount(Account account)
     {
-        _accounts.add(account);
+        accounts.add(account);
     }
 }

@@ -10,10 +10,10 @@ import java.util.Scanner;
  * сценарий выплат
  */
 public class MakePaymentScenario extends Scenario {
-    private final ICentralBankService _centralBankService;
+    private final ICentralBankService centralBankService;
     public MakePaymentScenario(ICentralBankService centralBankService) {
         super("Make interest payment");
-        _centralBankService = centralBankService;
+        this.centralBankService = centralBankService;
     }
 
     /**
@@ -21,12 +21,10 @@ public class MakePaymentScenario extends Scenario {
      */
     @Override
     public void run() {
-        ServiceResult serviceResult = _centralBankService.makePayment();
+        ServiceResult serviceResult = centralBankService.makePayment();
         Scanner scanner = new Scanner(System.in);
-        System.out.println(serviceResult.get_message());
+        System.out.println(serviceResult.getMessage());
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

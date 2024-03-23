@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер просмотра всех клиентов
  */
 public class CheckAllClientsProvider implements IScenarioProvider {
-    private final ICentralBankService _centralBankService;
-    private final ICurrentUserManager _currentUserManager;
+    private final ICentralBankService centralBankService;
+    private final ICurrentUserManager currentUserManager;
 
     public CheckAllClientsProvider(ICentralBankService centralBankService, ICurrentUserManager currentUserManager) {
-        _centralBankService = centralBankService;
-        _currentUserManager = currentUserManager;
+        this.centralBankService = centralBankService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class CheckAllClientsProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return null;
 
-        scenario = new CheckAllClientsScenario(_centralBankService);
+        scenario = new CheckAllClientsScenario(centralBankService);
         return scenario;
     }
 }

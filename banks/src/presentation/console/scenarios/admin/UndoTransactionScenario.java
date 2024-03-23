@@ -2,6 +2,7 @@ package presentation.console.scenarios.admin;
 
 import application.contracts.ICentralBankService;
 import application.result.ServiceResult;
+import domain.exceptions.NotFoundException;
 import presentation.console.Scenario;
 
 import java.util.Scanner;
@@ -11,10 +12,10 @@ import java.util.UUID;
  * Сценарий отчмены транзакции
  */
 public class UndoTransactionScenario extends Scenario {
-    private final ICentralBankService _centralBankService;
+    private final ICentralBankService centralBankService;
     public UndoTransactionScenario(ICentralBankService centralBankService) {
         super("Undo transaction");
-        _centralBankService = centralBankService;
+        this.centralBankService = centralBankService;
     }
 
     /**
@@ -26,11 +27,13 @@ public class UndoTransactionScenario extends Scenario {
         Scanner scanner = new Scanner(System.in);
 
         UUID id = UUID.fromString(scanner.nextLine());
-        ServiceResult serviceResult = _centralBankService.undoTransaction(id);
-        System.out.println(serviceResult.get_message());
+        try {
+            ServiceResult serviceResult = centralBankService.undoTransaction(id);
+            System.out.println(serviceResult.getMessage());
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

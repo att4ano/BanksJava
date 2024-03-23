@@ -1,17 +1,17 @@
 package presentation.console.scenarios.login;
 
 import application.contracts.IBankService;
-import application.cotracts.LoginResult;
+import application.result.LoginResult;
 import presentation.console.Scenario;
 
 import java.util.Scanner;
 
 public class LoginAsBankScenario extends Scenario {
-    private final IBankService _bankService;
+    private final IBankService bankService;
     public LoginAsBankScenario(IBankService bankService) {
         super("bank login");
 
-        _bankService = bankService;
+        this.bankService = bankService;
     }
 
     @Override
@@ -20,12 +20,9 @@ public class LoginAsBankScenario extends Scenario {
         Scanner scanner = new Scanner(System.in);
 
         String bankName = scanner.nextLine();
-        LoginResult loginResult = _bankService.login(bankName);
+        LoginResult loginResult = bankService.login(bankName);
 
-        System.out.println(loginResult.getMessage());
-        String input = scanner.nextLine();
-
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        System.out.println(loginResult.toString());
+        scanner.nextLine();
     }
 }

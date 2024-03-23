@@ -10,11 +10,11 @@ import java.util.Scanner;
  * провайдер сценария обновления информации
  */
 public class UpdateInformationScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
 
     public UpdateInformationScenario(IClientService clientService) {
         super("Update client information");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -29,19 +29,17 @@ public class UpdateInformationScenario extends Scenario {
         ServiceResult serviceResult = null;
 
         switch (infoType) {
-            case "Passport" -> serviceResult = _clientService.updatePassportData(newInfo);
-            case "Address" -> serviceResult = _clientService.updateAddress(newInfo);
+            case "Passport" -> serviceResult = clientService.updatePassportData(newInfo);
+            case "Address" -> serviceResult = clientService.updateAddress(newInfo);
         }
 
         if (serviceResult != null) {
-            System.out.println(serviceResult.get_message());
+            System.out.println(serviceResult.getMessage());
         } else {
             System.out.println("This info of client does not exists");
         }
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }
 

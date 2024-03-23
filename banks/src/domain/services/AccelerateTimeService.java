@@ -24,11 +24,11 @@ public class AccelerateTimeService implements IAccelerateTimeService {
      */
     @Override
     public BigDecimal accelerateTime(LocalDate newDate, Client client, @NotNull Account account) {
-        if (!account.get_client().equals(client))
+        if (!account.getClient().equals(client))
             return null;
 
-        double dayInterest = account.get_bank().get_interest() / 365;
-        BigDecimal result = account.get_moneyAmount();
+        double dayInterest = account.getBank().getInterest() / 365;
+        BigDecimal result = account.getMoneyAmount();
 
         int diffDays = LocalDate.now().until(newDate).getDays();
 

@@ -2,37 +2,23 @@ package application.result;
 
 import lombok.Getter;
 
-/**
- * Результат работы сервиса
- */
 @Getter
-public abstract class ServiceResult
-{
-    protected String _message;
+public abstract class ServiceResult {
+    private final String message;
 
-    private ServiceResult()
-    {
+    private ServiceResult(String message) {
+        this.message = message;
     }
 
-    /**
-     * Удачный результат
-     */
-    public static final class Success extends ServiceResult
-    {
-        public Success(String message)
-        {
-            _message = message;
+    public static final class Success extends ServiceResult {
+        public Success(String message) {
+            super(message);
         }
     }
 
-    /**
-     * Провальный результат
-     */
-    public static final class Failure extends ServiceResult
-    {
-        public Failure(String message)
-        {
-            _message = message;
+    public static final class Failure extends ServiceResult {
+        public Failure(String message) {
+            super(message);
         }
     }
 }

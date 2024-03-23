@@ -10,15 +10,15 @@ import java.util.Scanner;
  * класс, запускающий сценарий
  */
 public class ScenarioRunner {
-    private final List<IScenarioProvider> _providers;
+    private final List<IScenarioProvider> providers;
 
     public ScenarioRunner(List<IScenarioProvider> providers) {
-        _providers = providers;
+        this.providers = providers;
     }
 
     private @NotNull List<Scenario> GetScenarios() {
         List<Scenario> currentScenarios = new ArrayList<>();
-        for (var provider : _providers) {
+        for (var provider : providers) {
             Scenario scenario = null;
             scenario = provider.tryGetScenario(scenario);
             if (scenario != null)

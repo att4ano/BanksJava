@@ -12,12 +12,12 @@ import presentation.console.Scenario;
  */
 public class WithdrawMoneyProvider implements IScenarioProvider {
 
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public WithdrawMoneyProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -26,10 +26,10 @@ public class WithdrawMoneyProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new WithdrawMoneyScenario(_clientService);
+        scenario = new WithdrawMoneyScenario(clientService);
         return scenario;
     }
 }

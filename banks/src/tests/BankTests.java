@@ -7,6 +7,7 @@ import application.contracts.IBankService;
 import application.contracts.ICentralBankService;
 import application.contracts.IClientService;
 import application.contracts.ICurrentUserManager;
+import domain.exceptions.NotFoundException;
 import domain.interfaces.*;
 import domain.models.Admin;
 import domain.models.CentralBank;
@@ -67,19 +68,19 @@ public class BankTests {
     @Test
     public void createClientTest() {
         var newClient = centralBank.createNewClient( "alex", "dubstep", "Alpiyka", "12345678");
-        Assert.assertEquals(newClient.get_name(), "alex");
-        Assert.assertEquals(newClient.get_surname(), "dubstep");
-        Assert.assertEquals(newClient.get_address(), "Alpiyka");
-        Assert.assertEquals(newClient.get_passportData(), "12345678");
+        Assert.assertEquals(newClient.getName(), "alex");
+        Assert.assertEquals(newClient.getSurname(), "dubstep");
+        Assert.assertEquals(newClient.getAddress(), "Alpiyka");
+        Assert.assertEquals(newClient.getPassportData(), "12345678");
     }
 
     @Test
     public void createBankTest() {
         var newBank = centralBank.createNewBank( "Neiva", 0.1, 0.1, BigDecimal.valueOf(10000));
-        Assert.assertEquals(newBank.get_name(), "Neiva");
-        Assert.assertEquals(0.1, newBank.get_interest(), 0.0);
-        Assert.assertEquals(0.1, newBank.get_commission(), 0.0);
-        Assert.assertEquals(newBank.get_limit(), BigDecimal.valueOf(10000));
+        Assert.assertEquals(newBank.getName(), "Neiva");
+        Assert.assertEquals(0.1, newBank.getInterest(), 0.0);
+        Assert.assertEquals(0.1, newBank.getCommission(), 0.0);
+        Assert.assertEquals(newBank.getLimit(), BigDecimal.valueOf(10000));
     }
 
     @Test
@@ -87,9 +88,9 @@ public class BankTests {
         var client = centralBank.createNewClient( "alex", "dubstep", "Alpiyka", "12345678");
         var bank = centralBank.createNewBank( "Neiva", 0.1, 0.1, BigDecimal.valueOf(10000));
         Account account = bank.createDebitAccount(client);
-        Assert.assertEquals(account.get_bank(), bank);
-        Assert.assertEquals(account.get_client(), client);
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(0));
+        Assert.assertEquals(account.getBank(), bank);
+        Assert.assertEquals(account.getClient(), client);
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(0));
     }
 
     @Test
@@ -97,10 +98,10 @@ public class BankTests {
         var client = centralBank.createNewClient( "alex", "dubstep", "Alpiyka", "12345678");
         var bank = centralBank.createNewBank( "Neiva", 0.1, 0.1, BigDecimal.valueOf(10000));
         DepositAccount account = (DepositAccount) bank.createDepositAccount(client, 3, BigDecimal.valueOf(10000));
-        Assert.assertEquals(account.get_bank(), bank);
-        Assert.assertEquals(account.get_client(), client);
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(10000));
-        Assert.assertTrue(account.get_term() == 3);
+        Assert.assertEquals(account.getBank(), bank);
+        Assert.assertEquals(account.getClient(), client);
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(10000));
+        Assert.assertTrue(account.getTerm() == 3);
     }
 
     @Test
@@ -108,9 +109,9 @@ public class BankTests {
         var client = centralBank.createNewClient( "alex", "dubstep", "Alpiyka", "12345678");
         var bank = centralBank.createNewBank( "Neiva", 0.1, 0.1, BigDecimal.valueOf(10000));
         CreditAccount account = (CreditAccount) bank.createCreditAccount(client, BigDecimal.valueOf(10000));
-        Assert.assertEquals(account.get_bank(), bank);
-        Assert.assertEquals(account.get_client(), client);
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(10000));
+        Assert.assertEquals(account.getBank(), bank);
+        Assert.assertEquals(account.getClient(), client);
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(10000));
     }
 
     @Test
@@ -145,8 +146,12 @@ public class BankTests {
         Account account = bank.createDebitAccount(client);
         accountRepository.addNewAccount(account);
         clientService.login("alex", "dubstep");
-        clientService.addMoney(account.get_id(), BigDecimal.valueOf(10000));
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(10000));
+        try {
+            clientService.addMoney(account.getId(), BigDecimal.valueOf(10000));
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(10000));
     }
 
     @Test
@@ -160,8 +165,12 @@ public class BankTests {
         Account account = bank.createDebitAccount(client);
         accountRepository.addNewAccount(account);
         clientService.login("alex", "dubstep");
-        clientService.addMoney(account.get_id(), BigDecimal.valueOf(10000));
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(10000));
+        try {
+            clientService.addMoney(account.getId(), BigDecimal.valueOf(10000));
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(10000));
     }
 
     @Test
@@ -181,9 +190,13 @@ public class BankTests {
         accountRepository.addNewAccount(newAccount);
 
         clientService.login("alex", "dubstep");
-        clientService.addMoney(account.get_id(), BigDecimal.valueOf(10000));
-        clientService.transferMoney(account.get_id(), newAccount.get_id(), BigDecimal.valueOf(500));
-        Assert.assertEquals(newAccount.get_moneyAmount(), BigDecimal.valueOf(500));
+        try {
+            clientService.addMoney(account.getId(), BigDecimal.valueOf(10000));
+            clientService.transferMoney(account.getId(), newAccount.getId(), BigDecimal.valueOf(500));
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+        Assert.assertEquals(newAccount.getMoneyAmount(), BigDecimal.valueOf(500));
     }
 
     @Test
@@ -206,9 +219,13 @@ public class BankTests {
         accountRepository.addNewAccount(newAccount);
 
         clientService.login("alex", "dubstep");
-        clientService.addMoney(account.get_id(), BigDecimal.valueOf(10000));
-        clientService.transferMoney(account.get_id(), newAccount.get_id(), BigDecimal.valueOf(500));
-        Assert.assertEquals(newAccount.get_moneyAmount(), BigDecimal.valueOf(500));
+        try {
+            clientService.addMoney(account.getId(), BigDecimal.valueOf(10000));
+            clientService.transferMoney(account.getId(), newAccount.getId(), BigDecimal.valueOf(500));
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+        Assert.assertEquals(newAccount.getMoneyAmount(), BigDecimal.valueOf(500));
     }
 
     @Test
@@ -224,7 +241,7 @@ public class BankTests {
 
         centralBankService.login("1337");
         centralBankService.makePayment();
-        Assert.assertEquals(account.get_moneyAmount(), BigDecimal.valueOf(11000.0));
+        Assert.assertEquals(account.getMoneyAmount(), BigDecimal.valueOf(11000.0));
     }
 
     @Test
@@ -234,6 +251,7 @@ public class BankTests {
         var admin = new Admin(UUID.randomUUID(), "1337");
         adminRepository.AddNewAdmin(admin);
         var bank = centralBank.createNewBank( "Neiva", 0.1, 0.1, BigDecimal.valueOf(10000));
+        bank.subscribe(client);
         bankRepository.addNewBank(bank);
         Account account = bank.createDepositAccount(client, 3, BigDecimal.valueOf(10000));
         accountRepository.addNewAccount(account);

@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер сценария выхода из аккаунта банка
  */
 public class BankLogoutProvider implements IScenarioProvider {
-    private final IBankService _bankService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IBankService bankService;
+    private final ICurrentUserManager currentUserManager;
 
     public BankLogoutProvider(IBankService bankService, ICurrentUserManager currentUserManager) {
-        _bankService = bankService;
-        _currentUserManager = currentUserManager;
+        this.bankService = bankService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class BankLogoutProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.BankSession))
+        if (!(this.currentUserManager.getCurrentSession() instanceof CurrentSession.BankSession))
             return null;
 
-        scenario = new BankLogoutScenario(_bankService);
+        scenario = new BankLogoutScenario(bankService);
         return scenario;
     }
 }

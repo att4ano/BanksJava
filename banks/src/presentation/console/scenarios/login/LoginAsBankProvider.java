@@ -8,20 +8,20 @@ import presentation.console.IScenarioProvider;
 import presentation.console.Scenario;
 
 public class LoginAsBankProvider implements IScenarioProvider {
-    private final IBankService _bankService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IBankService bankService;
+    private final ICurrentUserManager currentUserManager;
 
     public LoginAsBankProvider(IBankService bankService, ICurrentUserManager currentUserManager) {
-        _bankService = bankService;
-        _currentUserManager = currentUserManager;
+        this.bankService = bankService;
+        this.currentUserManager = currentUserManager;
     }
 
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
             return null;
 
-        scenario = new LoginAsBankScenario(_bankService);
+        scenario = new LoginAsBankScenario(bankService);
         return scenario;
     }
 }

@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер сценария выхода за клиента
  */
 public class ClientLogoutProvider implements IScenarioProvider {
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public ClientLogoutProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class ClientLogoutProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new ClientLogoutScenario(_clientService);
+        scenario = new ClientLogoutScenario(clientService);
         return scenario;
     }
 }

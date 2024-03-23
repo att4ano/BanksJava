@@ -3,9 +3,10 @@ package application.abstractions;
 import domain.models.notofications.Notification;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public interface INotificationRepository {
-    HashSet<Notification> getAllNotifications();
+    Set<Notification> getAllNotifications();
 
     void AddNotification(Notification notification);
 }

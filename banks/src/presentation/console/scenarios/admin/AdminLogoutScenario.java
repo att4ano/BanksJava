@@ -10,10 +10,10 @@ import java.util.Scanner;
  * Суенарий выхода из аккаунта за админа
  */
 public class AdminLogoutScenario extends Scenario {
-    private final ICentralBankService _centralBankService;
+    private final ICentralBankService centralBankService;
     public AdminLogoutScenario(ICentralBankService centralBankService) {
         super("Logout");
-        _centralBankService = centralBankService;
+        this.centralBankService = centralBankService;
     }
 
     /**
@@ -21,12 +21,10 @@ public class AdminLogoutScenario extends Scenario {
      */
     @Override
     public void run() {
-        ServiceResult serviceResult = _centralBankService.logout();
+        ServiceResult serviceResult = centralBankService.logout();
         Scanner scanner = new Scanner(System.in);
-        System.out.println(serviceResult.get_message());
+        System.out.println(serviceResult.getMessage());
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

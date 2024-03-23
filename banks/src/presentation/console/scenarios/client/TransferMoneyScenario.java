@@ -2,6 +2,7 @@ package presentation.console.scenarios.client;
 
 import application.contracts.IClientService;
 import application.result.ServiceResult;
+import domain.exceptions.NotFoundException;
 import presentation.console.Scenario;
 
 import java.math.BigDecimal;
@@ -12,11 +13,11 @@ import java.util.UUID;
  * сценарий перевода денег
  */
 public class TransferMoneyScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
 
     public TransferMoneyScenario(IClientService clientService) {
         super("Transfer money");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -31,8 +32,12 @@ public class TransferMoneyScenario extends Scenario {
         UUID toId = UUID.fromString(scanner.nextLine());
         BigDecimal moneyAmount = scanner.nextBigDecimal();
 
-        ServiceResult serviceResult = _clientService.transferMoney(fromId, toId, moneyAmount);
-        System.out.println(serviceResult.get_message());
+        try {
+            ServiceResult serviceResult = clientService.transferMoney(fromId, toId, moneyAmount);
+            System.out.println(serviceResult.getMessage());
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
 
         scanner.nextLine();
         System.out.print("\033[H\033[2J");

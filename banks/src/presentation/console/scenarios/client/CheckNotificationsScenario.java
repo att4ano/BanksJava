@@ -11,10 +11,10 @@ import java.util.Scanner;
  * сценарий просмотра всех уведомлений
  */
 public class CheckNotificationsScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
     public CheckNotificationsScenario(IClientService clientService) {
         super("Check notifications");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -22,7 +22,7 @@ public class CheckNotificationsScenario extends Scenario {
      */
     @Override
     public void run() {
-        List<Notification> notifications = _clientService.checkClientNotifications();
+        List<Notification> notifications = clientService.checkClientNotifications();
 
         if (notifications != null)
             for (var notification : notifications) {

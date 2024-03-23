@@ -12,11 +12,11 @@ import java.util.Scanner;
  * сценарий просмотра всех банков
  */
 public class CheckAllBanksScenario extends Scenario {
-    private final ICentralBankService _centralBankService;
+    private final ICentralBankService centralBankService;
 
     public CheckAllBanksScenario(ICentralBankService centralBankService) {
         super("Check all banks");
-        _centralBankService = centralBankService;
+        this.centralBankService = centralBankService;
     }
 
     /**
@@ -24,7 +24,7 @@ public class CheckAllBanksScenario extends Scenario {
      */
     @Override
     public void run() {
-        List<Bank> banks = _centralBankService.checkAllBanks();
+        List<Bank> banks = centralBankService.checkAllBanks();
 
         if (banks != null)
             for (var bank : banks) {
@@ -34,7 +34,5 @@ public class CheckAllBanksScenario extends Scenario {
         Scanner scanner = new Scanner(System.in);
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

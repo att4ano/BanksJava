@@ -3,12 +3,14 @@ package application.application;
 import application.abstractions.*;
 import application.contracts.IClientService;
 import application.contracts.ICurrentUserManager;
-import application.cotracts.LoginResult;
+import application.result.LoginResult;
 import application.result.ServiceResult;
+import domain.exceptions.NotFoundException;
 import domain.interfaces.IAccelerateTimeService;
 import domain.interfaces.IAccountFactory;
 import domain.interfaces.ITransactionFactory;
 import domain.interfaces.Transaction;
+import domain.models.Bank;
 import domain.models.Client;
 import domain.models.accounts.Account;
 import domain.models.notofications.Notification;
@@ -23,27 +25,27 @@ import java.util.UUID;
  * Application-service для клиентов
  */
 public class ClientService implements IClientService {
-    private final ITransactionRepository _transactionRepository;
-    private final IAccountRepository _accountRepository;
-    private final IClientRepository _clientRepository;
-    private final IBankRepository _bankRepository;
-    private final INotificationRepository _notificationRepository;
-    private final ITransactionFactory _transactionFactory;
-    private final IAccountFactory _accountFactory;
-    private final IAccelerateTimeService _accelerateService;
-    private final ICurrentUserManager _currentUserManager;
+    private final ITransactionRepository transactionRepository;
+    private final IAccountRepository accountRepository;
+    private final IClientRepository clientRepository;
+    private final IBankRepository bankRepository;
+    private final INotificationRepository notificationRepository;
+    private final ITransactionFactory transactionFactory;
+    private final IAccountFactory accountFactory;
+    private final IAccelerateTimeService accelerateService;
+    private final ICurrentUserManager currentUserManager;
 
     public ClientService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IClientRepository clientRepository, IBankRepository bankRepository, INotificationRepository notificationRepository, ITransactionFactory transactionFactory, IAccountFactory accountFactory, IAccelerateTimeService accelerateService, ICurrentUserManager currentUserManager) {
-        _transactionRepository = transactionRepository;
-        _accountRepository = accountRepository;
-        _clientRepository = clientRepository;
-        _bankRepository = bankRepository;
-        _notificationRepository = notificationRepository;
-        _transactionFactory = transactionFactory;
-        _accountFactory = accountFactory;
-        _accelerateService = accelerateService;
-        _currentUserManager = currentUserManager;
-        _currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
+        this.transactionRepository = transactionRepository;
+        this.accountRepository = accountRepository;
+        this.clientRepository = clientRepository;
+        this.bankRepository = bankRepository;
+        this.notificationRepository = notificationRepository;
+        this.transactionFactory = transactionFactory;
+        this.accountFactory = accountFactory;
+        this.accelerateService = accelerateService;
+        this.currentUserManager = currentUserManager;
+        this.currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
     }
 
     /**
@@ -53,21 +55,21 @@ public class ClientService implements IClientService {
      */
     @Override
     public LoginResult login(String name, String surname) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
-            return new LoginResult.Failure();
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
+            return LoginResult.FAILURE;
 
-        Client client = _clientRepository.getAllClients()
+        Client client = clientRepository.getAllClients()
                 .stream()
-                .filter(client1 -> client1.get_name().equals(name) && client1.get_surname().equals(surname))
+                .filter(client1 -> client1.getName().equals(name) && client1.getSurname().equals(surname))
                 .findFirst()
                 .orElse(null);
 
         if (client == null) {
-            return new LoginResult.NotFound();
+            return LoginResult.NOT_FOUND;
         }
 
-        _currentUserManager.setCurrentSession(new CurrentSession.ClientSession(client));
-        return new LoginResult.Success();
+        currentUserManager.setCurrentSession(new CurrentSession.ClientSession(client));
+        return LoginResult.SUCCESS;
     }
 
     /**
@@ -75,10 +77,10 @@ public class ClientService implements IClientService {
      */
     @Override
     public ServiceResult logout() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        _currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
+        currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
         return new ServiceResult.Success("Success");
     }
 
@@ -88,18 +90,18 @@ public class ClientService implements IClientService {
      * @return результат работы сервиса
      */
     @Override
-    public ServiceResult addMoney(UUID accountId, BigDecimal moneyAmount) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+    public ServiceResult addMoney(UUID accountId, BigDecimal moneyAmount) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account currentAccount = _accountRepository.findAccount(accountId);
+        Account currentAccount = accountRepository.findAccount(accountId);
         if (currentAccount == null)
-            return new ServiceResult.Failure("Account not found");
+            throw NotFoundException.accountNotFound();
 
-        Transaction currentTransaction = _transactionFactory.createAddTransaction(currentAccount, moneyAmount);
-        currentTransaction.execute(clientSession.get_client());
+        Transaction currentTransaction = transactionFactory.createAddTransaction(currentAccount, moneyAmount);
+        currentTransaction.execute(clientSession.getClient());
 
-        _transactionRepository.addNewTransaction(currentTransaction);
+        transactionRepository.addNewTransaction(currentTransaction);
         return new ServiceResult.Success("Success");
     }
 
@@ -109,18 +111,18 @@ public class ClientService implements IClientService {
      * @return результат работы сервиса
      */
     @Override
-    public ServiceResult withdrawMoney(UUID accountId, BigDecimal moneyAmount) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+    public ServiceResult withdrawMoney(UUID accountId, BigDecimal moneyAmount) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account currentAccount = _accountRepository.findAccount(accountId);
+        Account currentAccount = accountRepository.findAccount(accountId);
         if (currentAccount == null)
-            return new ServiceResult.Failure("Account not found");
+            throw NotFoundException.accountNotFound();
 
-        Transaction currentTransaction = _transactionFactory.createWithdrawTransaction(currentAccount, moneyAmount);
-        currentTransaction.execute(clientSession.get_client());
+        Transaction currentTransaction = transactionFactory.createWithdrawTransaction(currentAccount, moneyAmount);
+        currentTransaction.execute(clientSession.getClient());
 
-        _transactionRepository.addNewTransaction(currentTransaction);
+        transactionRepository.addNewTransaction(currentTransaction);
         return new ServiceResult.Success("Success");
     }
 
@@ -131,20 +133,20 @@ public class ClientService implements IClientService {
      * @return результат работы сервиса
      */
     @Override
-    public ServiceResult transferMoney(UUID fromId, UUID toId, BigDecimal moneyAmount) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+    public ServiceResult transferMoney(UUID fromId, UUID toId, BigDecimal moneyAmount) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account fromAccount = _accountRepository.findAccount(fromId);
-        Account toAccount = _accountRepository.findAccount(toId);
+        Account fromAccount = accountRepository.findAccount(fromId);
+        Account toAccount = accountRepository.findAccount(toId);
 
         if (fromAccount == null || toAccount == null)
-            return new ServiceResult.Failure("Account not found");
+            throw NotFoundException.accountNotFound();
 
-        Transaction transferTransaction = _transactionFactory.createTransferTransaction(fromAccount, toAccount, moneyAmount);
-        transferTransaction.execute(clientSession.get_client());
+        Transaction transferTransaction = transactionFactory.createTransferTransaction(fromAccount, toAccount, moneyAmount);
+        transferTransaction.execute(clientSession.getClient());
 
-        _transactionRepository.addNewTransaction(transferTransaction);
+        transactionRepository.addNewTransaction(transferTransaction);
         return new ServiceResult.Success("Success");
     }
 
@@ -154,11 +156,11 @@ public class ClientService implements IClientService {
      */
     @Override
     public ServiceResult createDebitAccount(String bankName) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account newAccount = _accountFactory.createDebitAccount(clientSession.get_client(), _bankRepository.findBankByName(bankName));
-        _accountRepository.addNewAccount(newAccount);
+        Account newAccount = accountFactory.createDebitAccount(clientSession.getClient(), bankRepository.findBankByName(bankName));
+        accountRepository.addNewAccount(newAccount);
         return new ServiceResult.Success("Success");
     }
 
@@ -170,11 +172,11 @@ public class ClientService implements IClientService {
      */
     @Override
     public ServiceResult createDepositAccount(String bankName, Integer term, BigDecimal moneyAmount) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account newAccount = _accountFactory.createDepositAccount(clientSession.get_client(), _bankRepository.findBankByName(bankName), term, moneyAmount);
-        _accountRepository.addNewAccount(newAccount);
+        Account newAccount = accountFactory.createDepositAccount(clientSession.getClient(), bankRepository.findBankByName(bankName), term, moneyAmount);
+        accountRepository.addNewAccount(newAccount);
         return new ServiceResult.Success("Success");
     }
 
@@ -185,11 +187,11 @@ public class ClientService implements IClientService {
      */
     @Override
     public ServiceResult createCreditAccount(String bankName, BigDecimal moneyAmount) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Account newAccount = _accountFactory.createCreditAccount(clientSession.get_client(), _bankRepository.findBankByName(bankName), moneyAmount);
-        _accountRepository.addNewAccount(newAccount);
+        Account newAccount = accountFactory.createCreditAccount(clientSession.getClient(), bankRepository.findBankByName(bankName), moneyAmount);
+        accountRepository.addNewAccount(newAccount);
         return new ServiceResult.Success("Success");
     }
 
@@ -198,18 +200,23 @@ public class ClientService implements IClientService {
      * @return результат работы сервиса
      */
     public ServiceResult updatePassportData(String passportData) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
         Client client = Client.builder()
-                ._id(clientSession.get_client().get_id())
-                ._name(clientSession.get_client().get_name())
-                ._surname(clientSession.get_client().get_surname())
-                ._address(clientSession.get_client().get_address())
-                ._passportData(passportData)
+                .id(clientSession.getClient().getId())
+                .name(clientSession.getClient().getName())
+                .surname(clientSession.getClient().getSurname())
+                .address(clientSession.getClient().getAddress())
+                .passportData(passportData)
                 .build();
 
-        _clientRepository.update(clientSession.get_client().get_id(), client);
+        try {
+            clientRepository.update(clientSession.getClient().getId(), client);
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+
         return new ServiceResult.Success("Success");
     }
 
@@ -219,18 +226,23 @@ public class ClientService implements IClientService {
      */
     @Override
     public ServiceResult updateAddress(String address) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return new ServiceResult.Failure("You need to be logged in");
 
         Client client = Client.builder()
-                ._id(clientSession.get_client().get_id())
-                ._name(clientSession.get_client().get_name())
-                ._surname(clientSession.get_client().get_surname())
-                ._address(address)
-                ._passportData(clientSession.get_client().get_passportData())
+                .id(clientSession.getClient().getId())
+                .name(clientSession.getClient().getName())
+                .surname(clientSession.getClient().getSurname())
+                .address(address)
+                .passportData(clientSession.getClient().getPassportData())
                 .build();
 
-        _clientRepository.update(clientSession.get_client().get_id(), client);
+        try {
+            clientRepository.update(clientSession.getClient().getId(), client);
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
+
         return new ServiceResult.Success("Success");
     }
 
@@ -239,12 +251,12 @@ public class ClientService implements IClientService {
      */
     @Override
     public @Nullable List<Notification> checkClientNotifications() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return null;
 
-        return _notificationRepository.getAllNotifications()
+        return notificationRepository.getAllNotifications()
                 .stream()
-                .filter(notification -> notification.get_client().equals(clientSession.get_client()))
+                .filter(notification -> notification.getClient().equals(clientSession.getClient()))
                 .toList();
     }
 
@@ -253,12 +265,12 @@ public class ClientService implements IClientService {
      */
     @Override
     public @Nullable List<Account> checkClientAccounts() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return null;
 
-        return _accountRepository.getAllAccounts()
+        return accountRepository.getAllAccounts()
                 .stream()
-                .filter(account -> account.get_client().equals(clientSession.get_client()))
+                .filter(account -> account.getClient().equals(clientSession.getClient()))
                 .toList();
     }
 
@@ -268,16 +280,34 @@ public class ClientService implements IClientService {
      * @return результат работы сервиса
      */
     @Override
-    public BigDecimal accelerateTime(LocalDate date, UUID accountId) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+    public BigDecimal accelerateTime(LocalDate date, UUID accountId) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
             return null;
 
-        Account account = _accountRepository.findAccount(accountId);
+        Account account = accountRepository.findAccount(accountId);
         if (account == null)
-            return null;
+            throw NotFoundException.accountNotFound();
 
-        return _accelerateService.accelerateTime(date, clientSession.get_client(), account);
+        return accelerateService.accelerateTime(date, clientSession.getClient(), account);
     }
 
+    @Override
+    public ServiceResult subscribe(String bankName) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession clientSession))
+            return new ServiceResult.Failure("You need to be logged in");
+
+        Bank bank = bankRepository.getAllBanks()
+                .stream()
+                .filter(bank1 -> bank1.getName().equals(bankName))
+                .findFirst()
+                .orElse(null);
+
+        if (bank == null) {
+            throw NotFoundException.bankNotFound();
+        }
+
+        bank.subscribe(clientSession.getClient());
+        return new ServiceResult.Success("Success");
+    }
 
 }

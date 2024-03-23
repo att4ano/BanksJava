@@ -1,6 +1,6 @@
 package application.contracts;
 
-import application.cotracts.LoginResult;
+import application.result.LoginResult;
 import application.result.ServiceResult;
 
 public interface IBankService {

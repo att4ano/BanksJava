@@ -1,10 +1,12 @@
 package domain.models;
 
+import domain.exceptions.DomainException;
 import domain.models.accounts.Account;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -13,7 +15,7 @@ import java.util.UUID;
  */
 public class CentralBank
 {
-    private final HashSet<Bank> _banks = new HashSet<>();
+    private final Set<Bank> _banks = new HashSet<>();
 
     public CentralBank() { }
 
@@ -23,8 +25,12 @@ public class CentralBank
      * @param moneyAmount количество, денег которые переводят
      */
     public void transferMoney(@NotNull Account fromAccount, @NotNull Account toAccount, BigDecimal moneyAmount) {
-        fromAccount.withdrawMoney(moneyAmount);
-        toAccount.addMoney(moneyAmount);
+        try {
+            fromAccount.withdrawMoney(moneyAmount);
+            toAccount.addMoney(moneyAmount);
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
     }
 
     /**
@@ -59,12 +65,12 @@ public class CentralBank
      */
     public Client createNewClient(String name, String surname, @Nullable String address, @Nullable String passportData) {
         return Client.builder()
-                ._id(UUID.randomUUID())
-                ._name(name)
-                ._surname(surname)
-                ._address(address)
-                ._passportData(passportData)
-                ._accounts(new HashSet<>())
+                .id(UUID.randomUUID())
+                .name(name)
+                .surname(surname)
+                .address(address)
+                .passportData(passportData)
+                .accounts(new HashSet<>())
                 .build();
     }
 
@@ -77,12 +83,13 @@ public class CentralBank
      */
     public Bank createNewBank(String name, double interest, double commission, BigDecimal limit) {
         Bank bank =  Bank.builder()
-                ._id(UUID.randomUUID())
-                ._name(name)
-                ._interest(interest)
-                ._commission(commission)
-                ._limit(limit)
-                ._accounts(new HashSet<>())
+                .id(UUID.randomUUID())
+                .name(name)
+                .interest(interest)
+                .commission(commission)
+                .limit(limit)
+                .accounts(new HashSet<>())
+                .subscribers(new HashSet<>())
                 .build();
         subscribe(bank);
         return bank;

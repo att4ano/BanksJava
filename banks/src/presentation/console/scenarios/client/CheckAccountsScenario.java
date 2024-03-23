@@ -11,10 +11,10 @@ import java.util.Scanner;
  * Сценарий просмотра аккаунтов
  */
 public class CheckAccountsScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
     public CheckAccountsScenario(IClientService clientService) {
         super("Check accounts");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -22,7 +22,7 @@ public class CheckAccountsScenario extends Scenario {
      */
     @Override
     public void run() {
-        List<Account> accounts = _clientService.checkClientAccounts();
+        List<Account> accounts = this.clientService.checkClientAccounts();
 
         if (accounts != null)
             for (var account : accounts) {
@@ -32,7 +32,5 @@ public class CheckAccountsScenario extends Scenario {
         Scanner scanner = new Scanner(System.in);
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

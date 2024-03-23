@@ -1,5 +1,6 @@
 package domain.models.accounts;
 
+import domain.exceptions.MoneyOperationException;
 import domain.models.Bank;
 import domain.models.Client;
 import lombok.experimental.SuperBuilder;
@@ -17,20 +18,23 @@ public class DebitAccount extends Account {
     }
 
     /**
-     * @param moneyAmount количество денег, которые надо добавить
+     * @param newMoneyAmount количество денег, которые надо добавить
      */
     @Override
-    public void addMoney(BigDecimal moneyAmount) {
-       _moneyAmount = _moneyAmount.add(moneyAmount);
+    public void addMoney(BigDecimal newMoneyAmount) {
+       moneyAmount = moneyAmount.add(newMoneyAmount);
     }
 
     /**
-     * @param moneyAmount количество денег
+     * @param newMoneyAmount количество денег
      */
     @Override
-    public void withdrawMoney(BigDecimal moneyAmount) {
-        if (_moneyAmount.compareTo(moneyAmount) >= 0)
-            _moneyAmount = _moneyAmount.subtract(moneyAmount);
+    public void withdrawMoney(BigDecimal newMoneyAmount) throws MoneyOperationException {
+        if (moneyAmount.compareTo(newMoneyAmount) >= 0) {
+            moneyAmount = moneyAmount.subtract(newMoneyAmount);
+        } else {
+            throw MoneyOperationException.notEnoughMoney();
+        }
     }
 
     /**
@@ -38,6 +42,6 @@ public class DebitAccount extends Account {
      */
     @Override
     public String toString() {
-        return "Id: " + _id.toString() + " | " + "Type: Debit" + " | " + "Bank name: " + _bank.get_name() + " | " + "Money amount: " + _moneyAmount.toString();
+        return "Id: " + id.toString() + " | " + "Type: Debit" + " | " + "Bank name: " + bank.getName() + " | " + "Money amount: " + moneyAmount.toString();
     }
 }

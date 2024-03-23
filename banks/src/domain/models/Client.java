@@ -14,24 +14,28 @@ import java.util.UUID;
  */
 @Builder
 @Getter
+@Setter
 @AllArgsConstructor
 public class Client {
-    private final UUID _id;
-    private final String _name;
-    private final String _surname;
+    private final UUID id;
+    private String name;
+    private String surname;
+
     @Setter
     @Nullable
-    private String _address;
+    private String address;
+
     @Setter
     @Nullable
-    private String _passportData;
-    private HashSet<Account> _accounts = new HashSet<>();
+    private String passportData;
+    private HashSet<Account> accounts = new HashSet<>();
+
     public Client(UUID id, String name, String surname, @Nullable String address, @Nullable String passportData) {
-        _id = id;
-        _name = name;
-        _surname = surname;
-        _address = address;
-        _passportData = passportData;
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.address = address;
+        this.passportData = passportData;
     }
 
     /**
@@ -40,12 +44,12 @@ public class Client {
      * @param moneyAmount количество, денег которые переводят
      */
     public void transferMoney(@NotNull Account fromAccount, @NotNull Account toAccount, BigDecimal moneyAmount) {
-        if (fromAccount.get_bank().equals(toAccount.get_bank())) {
-            if (_accounts.contains(fromAccount))
-                fromAccount.get_bank().transferMoney(fromAccount, toAccount, moneyAmount);
+        if (fromAccount.getBank().equals(toAccount.getBank())) {
+            if (accounts.contains(fromAccount))
+                fromAccount.getBank().transferMoney(fromAccount, toAccount, moneyAmount);
         } else {
             CentralBank centralBank = new CentralBank();
-            if (_accounts.contains(fromAccount)) {
+            if (accounts.contains(fromAccount)) {
                 centralBank.transferMoney(fromAccount, toAccount, moneyAmount);
             }
         }
@@ -56,8 +60,8 @@ public class Client {
      * @param moneyAmount количество денег на которое поплняется
      */
     public void addMoney(Account account, BigDecimal moneyAmount) {
-        if (_accounts.contains(account))
-            account.get_bank().addMoney(account, moneyAmount);
+        if (accounts.contains(account))
+            account.getBank().addMoney(account, moneyAmount);
     }
 
     /**
@@ -65,8 +69,8 @@ public class Client {
      * @param moneyAmount количсество денег, которыне снимаются
      */
     public void withdrawMoney(Account account, BigDecimal moneyAmount) {
-        if (_accounts.contains(account))
-            account.get_bank().withdrawMoney(account, moneyAmount);
+        if (accounts.contains(account))
+            account.getBank().withdrawMoney(account, moneyAmount);
     }
 
     /**
@@ -75,7 +79,7 @@ public class Client {
      */
     public Account createDebitAccount(@NotNull Bank bank) {
         Account currentAccount = bank.createDebitAccount(this);
-        _accounts.add(currentAccount);
+        accounts.add(currentAccount);
 
         return currentAccount;
     }
@@ -87,7 +91,7 @@ public class Client {
      */
     public Account createDepositAccount(@NotNull Bank bank, Integer term, BigDecimal moneyAmount) {
         Account currentAccount = bank.createDepositAccount(this, term, moneyAmount);
-        _accounts.add(currentAccount);
+        accounts.add(currentAccount);
 
         return currentAccount;
     }
@@ -100,7 +104,7 @@ public class Client {
      */
     public Account createCreditAccount(@NotNull Bank bank, BigDecimal moneyAmount) {
         Account currentAccount = bank.createCreditAccount(this, moneyAmount);
-        _accounts.add(currentAccount);
+        accounts.add(currentAccount);
 
         return currentAccount;
     }
@@ -109,10 +113,10 @@ public class Client {
      * @return представление в виде строки
      */
     public String toString() {
-        return "Id: " + _id.toString() + " | "
-                + "Name: " + _name + " | "
-                + "Surname: " + _surname + " | "
-                + "Address: " + ((_address != null) ? _address : "NONE") + " | "
-                + "PassportData " + ((_passportData != null) ? _passportData : "NONE");
+        return "Id: " + id.toString() + " | "
+                + "Name: " + name + " | "
+                + "Surname: " + surname + " | "
+                + "Address: " + ((address != null) ? address : "NONE") + " | "
+                + "PassportData " + ((passportData != null) ? passportData : "NONE");
     }
 }

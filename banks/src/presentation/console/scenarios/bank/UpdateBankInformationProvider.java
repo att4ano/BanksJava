@@ -13,12 +13,12 @@ import presentation.console.scenarios.admin.CreateNewBankScenario;
  */
 public class UpdateBankInformationProvider implements IScenarioProvider {
 
-    private final IBankService _bankService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IBankService bankService;
+    private final ICurrentUserManager currentUserManager;
 
     public UpdateBankInformationProvider(IBankService bankService, ICurrentUserManager currentUserManager) {
-        _bankService = bankService;
-        _currentUserManager = currentUserManager;
+        this.bankService = bankService;
+        this.currentUserManager = currentUserManager;
     }
 
 
@@ -28,10 +28,10 @@ public class UpdateBankInformationProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.BankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.BankSession))
             return null;
 
-        scenario = new UpdateInformationScenario(_bankService);
+        scenario = new UpdateInformationScenario(bankService);
         return scenario;
     }
 }

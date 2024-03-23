@@ -19,6 +19,6 @@ public class InterestNotification extends Notification{
      */
     @Override
     public String toString() {
-        return _bank.get_name() + " has changed his deposit interest!";
+        return bank.getName() + " has changed his deposit interest!";
     }
 }

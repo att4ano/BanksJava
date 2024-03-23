@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер сценария ускорения времени
  */
 public class AccelerateTimeProvider implements IScenarioProvider {
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public AccelerateTimeProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class AccelerateTimeProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new AccelerateTimeScenario(_clientService);
+        scenario = new AccelerateTimeScenario(clientService);
         return scenario;
     }
 }

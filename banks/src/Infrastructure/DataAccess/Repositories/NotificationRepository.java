@@ -4,24 +4,25 @@ import application.abstractions.INotificationRepository;
 import domain.models.notofications.Notification;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Репозиторий уведомлений
  */
 public class NotificationRepository implements INotificationRepository {
 
-    private final HashSet<Notification> _notifications;
+    private final Set<Notification> notifications;
 
     public NotificationRepository(HashSet<Notification> notifications) {
-        _notifications = notifications;
+        this.notifications = notifications;
     }
 
     /**
      * @return все уведомления
      */
     @Override
-    public HashSet<Notification> getAllNotifications() {
-        return _notifications;
+    public Set<Notification> getAllNotifications() {
+        return notifications;
     }
 
     /**
@@ -29,6 +30,6 @@ public class NotificationRepository implements INotificationRepository {
      */
     @Override
     public void AddNotification(Notification notification) {
-        _notifications.add(notification);
+        notifications.add(notification);
     }
 }

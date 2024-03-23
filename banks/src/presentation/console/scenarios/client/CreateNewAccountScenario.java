@@ -11,10 +11,10 @@ import java.util.Scanner;
  * сценрий создания счета
  */
 public class CreateNewAccountScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
     protected CreateNewAccountScenario(IClientService clientService) {
         super("Create account");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -29,20 +29,20 @@ public class CreateNewAccountScenario extends Scenario {
         ServiceResult serviceResult = null;
 
         switch (accountType) {
-            case "Debit" -> serviceResult = _clientService.createDebitAccount(bankName);
+            case "Debit" -> serviceResult = clientService.createDebitAccount(bankName);
             case "Deposit" -> {
                 Integer term = Integer.valueOf(scanner.nextLine());
                 BigDecimal noneyAmount = new BigDecimal(scanner.nextLine());
-                serviceResult = _clientService.createDepositAccount(bankName, term, noneyAmount);
+                serviceResult = clientService.createDepositAccount(bankName, term, noneyAmount);
             }
             case "Credit" -> {
                 BigDecimal noneyAmount = new BigDecimal(scanner.nextLine());
-                serviceResult = _clientService.createCreditAccount(bankName, noneyAmount);
+                serviceResult = clientService.createCreditAccount(bankName, noneyAmount);
             }
         }
 
         if (serviceResult != null) {
-            System.out.println(serviceResult.get_message());
+            System.out.println(serviceResult.getMessage());
         } else {
             System.out.println("This type of account does not exists");
         }

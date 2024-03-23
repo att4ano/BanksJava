@@ -1,5 +1,6 @@
 package domain.models.transactions;
 
+import domain.exceptions.DomainException;
 import domain.interfaces.Transaction;
 import domain.models.Client;
 import domain.models.accounts.Account;
@@ -11,27 +12,34 @@ import java.util.UUID;
 
 @Builder
 public class AddMoneyTransaction extends Transaction {
-    private final Account _account;
-    private final BigDecimal _moneyAmount;
+    private final Account account;
+    private final BigDecimal moneyAmount;
 
     public AddMoneyTransaction(Account account, BigDecimal moneyAmount) {
         super(UUID.randomUUID());
-        _account = account;
-        _moneyAmount = moneyAmount;
+        this.account = account;
+        this.moneyAmount = moneyAmount;
+
     }
 
     @Override
     public void execute(@NotNull Client client) {
-        client.addMoney(_account, _moneyAmount);
+        client.addMoney(account, moneyAmount);
+        status = TransactionStatus.DONE;
     }
 
     @Override
     public void undo() {
-        _account.withdrawMoney(_moneyAmount);
+        try {
+            account.withdrawMoney(moneyAmount);
+            status = TransactionStatus.CANCELLED;
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
     }
 
     @Override
     public String toString() {
-        return "Id: " + _id.toString() + " | " + "Type: Addition" + " | " + "Account: " + _account.get_id() + " | " + "Money amount: " + _moneyAmount.toString();
+        return "Id: " + id.toString() + " | " + "Type: Addition" + " | " + "Account: " + account.getId() + " | " + "Money amount: " + moneyAmount.toString();
     }
 }

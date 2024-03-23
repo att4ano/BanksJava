@@ -11,10 +11,10 @@ import java.util.Scanner;
  * сценарий просмотра всех транзакций
  */
 public class CheckAllTransactionsScenario extends Scenario {
-    private final ICentralBankService _centralBankService;
+    private final ICentralBankService centralBankService;
     public CheckAllTransactionsScenario(ICentralBankService centralBankService) {
         super("Check all transactions");
-        _centralBankService = centralBankService;
+        this.centralBankService = centralBankService;
     }
 
     /**
@@ -22,7 +22,7 @@ public class CheckAllTransactionsScenario extends Scenario {
      */
     @Override
     public void run() {
-        List<Transaction> transactions = _centralBankService.checkAllTransactions();
+        List<Transaction> transactions = this.centralBankService.checkAllTransactions();
 
         if (transactions != null)
             for (var transaction : transactions) {
@@ -32,7 +32,5 @@ public class CheckAllTransactionsScenario extends Scenario {
         Scanner scanner = new Scanner(System.in);
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }

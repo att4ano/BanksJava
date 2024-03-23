@@ -11,12 +11,12 @@ import presentation.console.Scenario;
  * провайдер сценария просмотра всех аккаунтов
  */
 public class CheckAccountsProvider implements IScenarioProvider {
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public CheckAccountsProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     /**
@@ -25,10 +25,10 @@ public class CheckAccountsProvider implements IScenarioProvider {
      */
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.ClientSession))
             return null;
 
-        scenario = new CheckAccountsScenario(_clientService);
+        scenario = new CheckAccountsScenario(clientService);
         return scenario;
     }
 }

@@ -1,5 +1,6 @@
 package domain.models;
 
+import domain.exceptions.DomainException;
 import domain.interfaces.ISubscriber;
 import domain.models.accounts.Account;
 import domain.models.accounts.CreditAccount;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,19 +22,20 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class Bank implements ISubscriber {
-    private final UUID _id;
-    private final String _name;
-    private double _interest;
-    private double _commission;
-    private BigDecimal _limit;
-    private HashSet<Account> _accounts = new HashSet<>();
+    private final UUID id;
+    private String name;
+    private double interest;
+    private double commission;
+    private BigDecimal limit;
+    private Set<Account> accounts = new HashSet<>();
+    private Set<Client> subscribers = new HashSet<>();
 
     public Bank(UUID id, String name, double interest, double commission, BigDecimal limit) {
-        _id = id;
-        _name = name;
-        _interest = interest;
-        _commission = commission;
-        _limit = limit;
+        this.id = id;
+        this.name = name;
+        this.interest = interest;
+        this.commission = commission;
+        this.limit = limit;
     }
 
     /**
@@ -40,11 +43,15 @@ public class Bank implements ISubscriber {
      */
     @Override
     public void update() {
-        for (var account : _accounts) {
+        for (var account : accounts) {
             if (account instanceof DepositAccount depositAccount) {
                 depositAccount.makePayment();
             }
         }
+    }
+
+    public void subscribe(Client client) {
+        subscribers.add(client);
     }
 
     /**
@@ -53,8 +60,13 @@ public class Bank implements ISubscriber {
      * @param moneyAmount количество денег
      */
     public void transferMoney(@NotNull Account fromAccount, @NotNull Account toAccount, BigDecimal moneyAmount) {
-        fromAccount.withdrawMoney(moneyAmount);
-        toAccount.addMoney(moneyAmount);
+        try {
+            fromAccount.withdrawMoney(moneyAmount);
+            toAccount.addMoney(moneyAmount);
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
+
     }
 
     /**
@@ -62,7 +74,11 @@ public class Bank implements ISubscriber {
      * @param moneyAmount количество денег на которое поплняется
      */
     public void addMoney(@NotNull Account account, BigDecimal moneyAmount) {
-        account.addMoney(moneyAmount);
+        try {
+            account.addMoney(moneyAmount);
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
     }
 
     /**
@@ -70,7 +86,11 @@ public class Bank implements ISubscriber {
      * @param moneyAmount количсество денег, которыне снимаются
      */
     public void withdrawMoney(@NotNull Account account, BigDecimal moneyAmount) {
-        account.withdrawMoney(moneyAmount);
+        try {
+            account.withdrawMoney(moneyAmount);
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
     }
 
     /**
@@ -79,13 +99,13 @@ public class Bank implements ISubscriber {
      */
     public Account createDebitAccount(Client client) {
         Account account = DebitAccount.builder()
-                ._id(UUID.randomUUID())
-                ._bank(this)
-                ._client(client)
-                ._moneyAmount(BigDecimal.valueOf(0))
+                .id(UUID.randomUUID())
+                .bank(this)
+                .client(client)
+                .moneyAmount(BigDecimal.valueOf(0))
                 .build();
-        _accounts.add(account);
-        client.get_accounts().add(account);
+        accounts.add(account);
+        client.getAccounts().add(account);
         return account;
     }
 
@@ -96,12 +116,12 @@ public class Bank implements ISubscriber {
      */
     public Account createCreditAccount(Client client, BigDecimal moneyAmount) {
         Account account = CreditAccount.builder()
-                ._id(UUID.randomUUID())
-                ._bank(this)
-                ._client(client)
-                ._moneyAmount(moneyAmount)
+                .id(UUID.randomUUID())
+                .bank(this)
+                .client(client)
+                .moneyAmount(moneyAmount)
                 .build();
-        _accounts.add(account);
+        accounts.add(account);
         return account;
     }
 
@@ -113,13 +133,13 @@ public class Bank implements ISubscriber {
      */
     public Account createDepositAccount(Client client, Integer term, BigDecimal moneyAmount) {
         Account account = DepositAccount.builder()
-                ._id(UUID.randomUUID())
-                ._bank(this)
-                ._client(client)
-                ._term(term)
-                ._moneyAmount(moneyAmount)
+                .id(UUID.randomUUID())
+                .bank(this)
+                .client(client)
+                .term(term)
+                .moneyAmount(moneyAmount)
                 .build();
-        _accounts.add(account);
+        accounts.add(account);
         return account;
     }
 
@@ -127,7 +147,7 @@ public class Bank implements ISubscriber {
      * @return представление банка ввиде строки
      */
     public String toString() {
-        return "Id: " + _id.toString() + " | " + "name: " + _name + " | " + "Interest: " + _interest + " | " + "Commission: " + _commission + " | " + "Limit: " + _limit;
+        return "Id: " + id.toString() + " | " + "name: " + name + " | " + "Interest: " + interest + " | " + "Commission: " + commission + " | " + "Limit: " + limit;
     }
 
 }

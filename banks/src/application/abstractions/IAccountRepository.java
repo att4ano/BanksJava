@@ -4,11 +4,12 @@ import domain.models.accounts.Account;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public interface IAccountRepository
 {
-    HashSet<Account> getAllAccounts();
+    Set<Account> getAllAccounts();
 
     @Nullable Account findAccount(UUID Id);
 

@@ -1,5 +1,6 @@
 package domain.models.transactions;
 
+import domain.exceptions.DomainException;
 import domain.interfaces.Transaction;
 import domain.models.Client;
 import domain.models.accounts.Account;
@@ -11,30 +12,36 @@ import java.util.UUID;
 
 @Builder
 public class TransferMoneyTransaction extends Transaction {
-    private final Account _fromAccount;
-    private final Account _toAccount;
-    private final BigDecimal _moneyAmount;
+    private final Account fromAccount;
+    private final Account toAccount;
+    private final BigDecimal moneyAmount;
 
     public TransferMoneyTransaction(Account fromAccount, Account toAccount, BigDecimal moneyAmount) {
         super(UUID.randomUUID());
-        _fromAccount = fromAccount;
-        _toAccount = toAccount;
-        _moneyAmount = moneyAmount;
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
+        this.moneyAmount = moneyAmount;
     }
 
     @Override
     public void execute(@NotNull Client client) {
-        client.transferMoney(_fromAccount, _toAccount, _moneyAmount);
+        client.transferMoney(fromAccount, toAccount, moneyAmount);
+        status = TransactionStatus.DONE;
     }
 
     @Override
     public void undo() {
-        _fromAccount.addMoney(_moneyAmount);
-        _toAccount.withdrawMoney(_moneyAmount);
+        try {
+            fromAccount.addMoney(moneyAmount);
+            toAccount.withdrawMoney(moneyAmount);
+            status = TransactionStatus.CANCELLED;
+        } catch (DomainException exception) {
+            System.out.println(exception.toString());
+        }
     }
 
     @Override
     public String toString() {
-        return "Id: " + _id.toString() + " | " + "Type: Transfer" + " | " + "Account: " + _fromAccount.get_id() + " | " + "Money amount: " + _moneyAmount.toString();
+        return "Id: " + id.toString() + " | " + "Type: Transfer" + " | " + "Account: " + fromAccount.getId() + " | " + "Money amount: " + moneyAmount.toString();
     }
 }

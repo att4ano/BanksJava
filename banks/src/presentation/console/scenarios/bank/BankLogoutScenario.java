@@ -10,10 +10,10 @@ import java.util.Scanner;
  * сценарий выхода из банка
  */
 public class BankLogoutScenario extends Scenario {
-    private final IBankService _bankService;
+    private final IBankService bankService;
     public BankLogoutScenario(IBankService bankService) {
         super("Logout");
-        _bankService = bankService;
+        this.bankService = bankService;
     }
 
     /**
@@ -21,9 +21,9 @@ public class BankLogoutScenario extends Scenario {
      */
     @Override
     public void run() {
-        ServiceResult serviceResult = _bankService.logout();
+        ServiceResult serviceResult = bankService.logout();
         Scanner scanner = new Scanner(System.in);
-        System.out.println(serviceResult.get_message());
+        System.out.println(serviceResult.getMessage());
 
         scanner.nextLine();
         System.out.print("\033[H\033[2J");

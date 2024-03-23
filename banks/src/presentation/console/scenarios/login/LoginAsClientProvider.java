@@ -8,20 +8,20 @@ import presentation.console.IScenarioProvider;
 import presentation.console.Scenario;
 
 public class LoginAsClientProvider implements IScenarioProvider {
-    private final IClientService _clientService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IClientService clientService;
+    private final ICurrentUserManager currentUserManager;
 
     public LoginAsClientProvider(IClientService clientService, ICurrentUserManager currentUserManager) {
-        _clientService = clientService;
-        _currentUserManager = currentUserManager;
+        this.clientService = clientService;
+        this.currentUserManager = currentUserManager;
     }
 
     @Override
     public Scenario tryGetScenario(@Nullable Scenario scenario) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
             return null;
 
-        scenario = new LoginAsClientScenario(_clientService);
+        scenario = new LoginAsClientScenario(clientService);
         return scenario;
     }
 }

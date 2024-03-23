@@ -61,7 +61,7 @@ public class Main {
         adminRepository.AddNewAdmin(admin);
         accountRepository.addNewAccount(newAccount);
         accountRepository.addNewAccount(depositAccount);
-        newClient.get_accounts().add(newAccount);
+        newClient.getAccounts().add(newAccount);
 
         var client = new Client(UUID.randomUUID(), "nekit", "bitbox", "Vyazma", "123456789");
         var account = new DebitAccount(UUID.randomUUID(), bank, client);

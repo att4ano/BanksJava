@@ -3,13 +3,14 @@ package application.application;
 import application.abstractions.*;
 import application.contracts.ICentralBankService;
 import application.contracts.ICurrentUserManager;
-import application.cotracts.LoginResult;
+import application.result.LoginResult;
 import application.result.ServiceResult;
+import domain.exceptions.AlreadyExistsException;
+import domain.exceptions.NotFoundException;
 import domain.interfaces.*;
 import domain.models.Admin;
 import domain.models.Bank;
 import domain.models.Client;
-import domain.models.notofications.Notification;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -20,27 +21,27 @@ import java.util.UUID;
  * Application-service для центрального банка
  */
 public class CentralBankService implements ICentralBankService {
-    private final IAdminRepository _adminRepository;
-    private final IBankRepository _bankRepository;
-    private final IClientRepository _clientRepository;
-    private final ITransactionRepository _transactionRepository;
-    private final ICreateNewBankService _createNewBankService;
-    private final ICreateNewClientService _createNewClientService;
-    private final IMakePaymentService _makePaymentService;
-    private final IUndoTransactionService _undoTransactionService;
-    private final ICurrentUserManager _currentUserManager;
+    private final IAdminRepository adminRepository;
+    private final IBankRepository bankRepository;
+    private final IClientRepository clientRepository;
+    private final ITransactionRepository transactionRepository;
+    private final ICreateNewBankService createNewBankService;
+    private final ICreateNewClientService createNewClientService;
+    private final IMakePaymentService makePaymentService;
+    private final IUndoTransactionService undoTransactionService;
+    private final ICurrentUserManager currentUserManager;
 
     public CentralBankService(IAdminRepository adminRepository, IBankRepository bankRepository, IClientRepository clientRepository, ITransactionRepository transactionRepository, ICreateNewBankService createNewBankService, ICreateNewClientService createNewClientService, IMakePaymentService makePaymentService, IUndoTransactionService undoTransactionService, ICurrentUserManager currentUserManager) {
-        _adminRepository = adminRepository;
-        _bankRepository = bankRepository;
-        _clientRepository = clientRepository;
-        _transactionRepository = transactionRepository;
-        _createNewBankService = createNewBankService;
-        _createNewClientService = createNewClientService;
-        _makePaymentService = makePaymentService;
-        _undoTransactionService = undoTransactionService;
-        _currentUserManager = currentUserManager;
-        _currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
+        this.adminRepository = adminRepository;
+        this.bankRepository = bankRepository;
+        this.clientRepository = clientRepository;
+        this.transactionRepository = transactionRepository;
+        this.createNewBankService = createNewBankService;
+        this.createNewClientService = createNewClientService;
+        this.makePaymentService = makePaymentService;
+        this.undoTransactionService = undoTransactionService;
+        this.currentUserManager = currentUserManager;
+        this.currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
     }
 
     /**
@@ -49,16 +50,16 @@ public class CentralBankService implements ICentralBankService {
      */
     @Override
     public LoginResult login(String password) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
-            return new LoginResult.Failure();
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.UnauthorizedSession))
+            return LoginResult.FAILURE;
 
-        Admin admin = _adminRepository.findAdmin(password);
+        Admin admin = adminRepository.findAdmin(password);
 
         if (admin == null)
-            return new LoginResult.Failure();
+            return LoginResult.FAILURE;
 
-        _currentUserManager.setCurrentSession(new CurrentSession.CentralBankSession(admin));
-        return new LoginResult.Success();
+        currentUserManager.setCurrentSession(new CurrentSession.CentralBankSession(admin));
+        return LoginResult.SUCCESS;
     }
 
     /**
@@ -66,10 +67,10 @@ public class CentralBankService implements ICentralBankService {
      */
     @Override
     public ServiceResult logout() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        _currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
+        currentUserManager.setCurrentSession(new CurrentSession.UnauthorizedSession());
         return new ServiceResult.Success("Success");
     }
 
@@ -81,21 +82,21 @@ public class CentralBankService implements ICentralBankService {
      * @return результат попытки создания
      */
     @Override
-    public ServiceResult createNewBank(String name, double interest, double commission, BigDecimal limit) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+    public ServiceResult createNewBank(String name, double interest, double commission, BigDecimal limit) throws AlreadyExistsException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Bank bank = _bankRepository.getAllBanks()
+        Bank bank = bankRepository.getAllBanks()
                 .stream()
-                .filter(bank1 -> bank1.get_name().equals(name))
+                .filter(bank1 -> bank1.getName().equals(name))
                 .findFirst()
                 .orElse(null);
 
         if (bank != null)
-            return new ServiceResult.Failure("This bank is already exists");
+            throw AlreadyExistsException.bankAlreadyExists();
 
-        bank = _createNewBankService.CreateNewBank(name, interest, commission, limit);
-        _bankRepository.addNewBank(bank);
+        bank = createNewBankService.CreateNewBank(name, interest, commission, limit);
+        bankRepository.addNewBank(bank);
         return new ServiceResult.Success("Success");
     }
 
@@ -107,21 +108,21 @@ public class CentralBankService implements ICentralBankService {
      * @return результат попытки создания
      */
     @Override
-    public ServiceResult createNewClient(String name, String surname, @Nullable String address, @Nullable String passportData) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+    public ServiceResult createNewClient(String name, String surname, @Nullable String address, @Nullable String passportData) throws AlreadyExistsException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Client client = _clientRepository.getAllClients()
+        Client client = clientRepository.getAllClients()
                 .stream()
-                .filter(client1 -> client1.get_name().equals(name) && client1.get_surname().equals(surname))
+                .filter(client1 -> client1.getName().equals(name) && client1.getSurname().equals(surname))
                 .findFirst()
                 .orElse(null);
 
         if (client != null)
-            return new ServiceResult.Failure("This client is already exists");
+            throw AlreadyExistsException.clientAlreadyExists();
 
-        client = _createNewClientService.createNewClient(name, surname, address, passportData);
-        _clientRepository.addNewClient(client);
+        client = createNewClientService.createNewClient(name, surname, address, passportData);
+        clientRepository.addNewClient(client);
         return new ServiceResult.Success("Success");
     }
 
@@ -130,10 +131,10 @@ public class CentralBankService implements ICentralBankService {
      */
     @Override
     public ServiceResult makePayment() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        _makePaymentService.MakePayment();
+        makePaymentService.MakePayment();
         return new ServiceResult.Success("Success");
     }
 
@@ -142,16 +143,15 @@ public class CentralBankService implements ICentralBankService {
      * @return результат отмены транзакции
      */
     @Override
-    public ServiceResult undoTransaction(UUID transactionId) {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+    public ServiceResult undoTransaction(UUID transactionId) throws NotFoundException {
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return new ServiceResult.Failure("You need to be logged in");
 
-        Transaction transaction = _transactionRepository.findTransaction(transactionId);
+        Transaction transaction = transactionRepository.findTransaction(transactionId);
         if (transaction == null)
-            return new ServiceResult.Failure("Transaction not found");
+            throw NotFoundException.transactionNotFound();
 
-        _undoTransactionService.undoTransaction(transaction);
-        _transactionRepository.deleteTransaction(transactionId);
+        undoTransactionService.undoTransaction(transaction);
         return new ServiceResult.Success("Success");
     }
 
@@ -159,10 +159,10 @@ public class CentralBankService implements ICentralBankService {
      * @return список всех банков системы
      */
     public @Nullable List<Bank> checkAllBanks() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return null;
 
-        return _bankRepository.getAllBanks()
+        return bankRepository.getAllBanks()
                 .stream()
                 .toList();
     }
@@ -172,10 +172,10 @@ public class CentralBankService implements ICentralBankService {
      */
     @Override
     public List<Client> checkAllClients() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return null;
 
-        return _clientRepository.getAllClients()
+        return clientRepository.getAllClients()
                 .stream()
                 .toList();
     }
@@ -185,10 +185,10 @@ public class CentralBankService implements ICentralBankService {
      */
     @Override
     public List<Transaction> checkAllTransactions() {
-        if (!(_currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
+        if (!(currentUserManager.getCurrentSession() instanceof CurrentSession.CentralBankSession))
             return null;
 
-        return _transactionRepository.getAllTransactions()
+        return transactionRepository.getAllTransactions()
                 .stream()
                 .toList();
     }

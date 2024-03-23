@@ -1,10 +1,11 @@
 package domain.models.accounts;
 
+import domain.exceptions.DepositAccountException;
+import domain.exceptions.DomainException;
 import domain.interfaces.Transaction;
 import domain.models.Bank;
 import domain.models.Client;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -20,29 +21,29 @@ import java.util.UUID;
 @AllArgsConstructor
 public abstract class Account
 {
-    protected final UUID _id;
-    protected final Bank _bank;
-    protected final Client _client;
-    protected BigDecimal _moneyAmount;
-    protected HashSet<Transaction> _operations = new HashSet<>();
+    protected final UUID id;
+    protected final Bank bank;
+    protected final Client client;
+    protected BigDecimal moneyAmount;
+    protected HashSet<Transaction> operations = new HashSet<>();
 
     public Account(UUID accountId, Bank bank, Client client)
     {
-        _id = accountId;
-        _bank = bank;
-        _client = client;
-        _moneyAmount = new BigDecimal(0);
+        this.id = accountId;
+        this.bank = bank;
+        this.client = client;
+        this.moneyAmount = new BigDecimal(0);
     }
 
     /**
      * @param moneyAmount количество денег, которые надо добавить
      */
-    public abstract void addMoney(BigDecimal moneyAmount);
+    public abstract void addMoney(BigDecimal moneyAmount) throws DomainException;
 
     /**
      * @param moneyAmount количество денег
      */
-    public abstract void withdrawMoney(BigDecimal moneyAmount);
+    public abstract void withdrawMoney(BigDecimal moneyAmount) throws DomainException;
 
     /**
      * @return представление ввиде строки

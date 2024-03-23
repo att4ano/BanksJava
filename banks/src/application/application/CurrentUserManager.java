@@ -7,7 +7,7 @@ import application.contracts.ICurrentUserManager;
  */
 public class CurrentUserManager implements ICurrentUserManager {
 
-    private CurrentSession _currentSession;
+    private CurrentSession currentSession;
 
     public CurrentUserManager() { }
 
@@ -16,7 +16,7 @@ public class CurrentUserManager implements ICurrentUserManager {
      */
     @Override
     public CurrentSession getCurrentSession() {
-        return _currentSession;
+        return currentSession;
     }
 
     /**
@@ -24,7 +24,7 @@ public class CurrentUserManager implements ICurrentUserManager {
      */
     @Override
     public void setCurrentSession(CurrentSession currentSession) {
-        _currentSession = currentSession;
+        this.currentSession = currentSession;
     }
 }
 

@@ -1,10 +1,12 @@
 package Infrastructure.DataAccess.Repositories;
 
 import application.abstractions.IBankRepository;
+import domain.exceptions.NotFoundException;
 import domain.models.Bank;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -12,20 +14,20 @@ import java.util.UUID;
  */
 public class BankRepository implements IBankRepository
 {
-    private final HashSet<Bank> _banks;
+    private final Set<Bank> banks;
 
     public BankRepository(HashSet<Bank> banks)
     {
-        _banks = banks;
+        this.banks = banks;
     }
 
     /**
      * @return все банки
      */
     @Override
-    public HashSet<Bank> getAllBanks()
+    public Set<Bank> getAllBanks()
     {
-        return _banks;
+        return banks;
     }
 
     /**
@@ -34,16 +36,16 @@ public class BankRepository implements IBankRepository
      */
     @Override
     public @Nullable Bank findBank(UUID id) {
-        return _banks.stream()
-                .filter(bank -> bank.get_id().equals(id))
+        return banks.stream()
+                .filter(bank -> bank.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public @Nullable Bank findBankByName(String bankName) {
-        return _banks.stream()
-                .filter(bank -> bank.get_name().equals(bankName))
+        return banks.stream()
+                .filter(bank -> bank.getName().equals(bankName))
                 .findFirst()
                 .orElse(null);
     }
@@ -54,18 +56,26 @@ public class BankRepository implements IBankRepository
     @Override
     public void addNewBank(Bank bank)
     {
-        _banks.add(bank);
+        banks.add(bank);
     }
 
     @Override
-    public void update(Bank bank) {
-        Bank currentBank = _banks.stream()
-                .filter(bank1 -> bank1.get_id().equals(bank.get_id()))
+    public void update(UUID bankId, Bank bank) throws NotFoundException {
+        Bank currentBank = banks.stream()
+                .filter(bank1 -> bank1.getId().equals(bankId))
                 .findFirst()
                 .orElse(null);
 
-        _banks.remove(currentBank);
-        _banks.add(bank);
+        if (currentBank == null) {
+            throw NotFoundException.bankNotFound();
+        }
+
+        currentBank.setName(bank.getName());
+        currentBank.setInterest(bank.getInterest());
+        currentBank.setCommission(bank.getCommission());
+        currentBank.setLimit(bank.getLimit());
+        currentBank.setAccounts(bank.getAccounts());
+        currentBank.setSubscribers(bank.getSubscribers());
     }
 
 

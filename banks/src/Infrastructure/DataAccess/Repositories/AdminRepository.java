@@ -5,24 +5,24 @@ import domain.models.Admin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
-import java.util.UUID;
+import java.util.Set;
 
 /**
  * Репозиторий админов
  */
 public class AdminRepository implements IAdminRepository {
-    private final HashSet<Admin> _admin;
+    private final Set<Admin> admins;
 
-    public AdminRepository(HashSet<Admin> admin) {
-        _admin = admin;
+    public AdminRepository(HashSet<Admin> admins) {
+        this.admins = admins;
     }
 
     /**
      * @return все админы
      */
     @Override
-    public HashSet<Admin> getAllAdmins() {
-        return _admin;
+    public Set<Admin> getAllAdmins() {
+        return admins;
     }
 
     /**
@@ -31,8 +31,8 @@ public class AdminRepository implements IAdminRepository {
      */
     @Override
     public @Nullable Admin findAdmin(String adminPassword) {
-        return _admin.stream()
-                .filter(admin -> admin.get_password().equals(adminPassword))
+        return admins.stream()
+                .filter(admin -> admin.getPassword().equals(adminPassword))
                 .findFirst()
                 .orElse(null);
     }
@@ -42,6 +42,6 @@ public class AdminRepository implements IAdminRepository {
      */
     @Override
     public void AddNewAdmin(Admin admin) {
-        _admin.add(admin);
+        admins.add(admin);
     }
 }

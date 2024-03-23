@@ -19,10 +19,10 @@ public abstract class CurrentSession {
     //
     @Getter
     public static final class ClientSession extends CurrentSession {
-        private final Client _client;
+        private final Client client;
 
         public ClientSession(Client client) {
-            _client = client;
+            this.client = client;
         }
 
     }
@@ -32,10 +32,10 @@ public abstract class CurrentSession {
      */
     @Getter
     public static final class BankSession extends CurrentSession {
-        private final Bank _bank;
+        private final Bank bank;
 
         public BankSession(Bank bank) {
-            _bank = bank;
+            this.bank = bank;
         }
     }
 
@@ -43,10 +43,10 @@ public abstract class CurrentSession {
      * Сессия за центральный банк
      */
     public static final class CentralBankSession extends CurrentSession {
-        private final Admin _admin;
+        private final Admin admin;
 
         public CentralBankSession(Admin admin) {
-            _admin = admin;
+            this.admin = admin;
         }
     }
 

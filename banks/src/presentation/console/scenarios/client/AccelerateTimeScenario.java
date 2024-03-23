@@ -1,6 +1,7 @@
 package presentation.console.scenarios.client;
 
 import application.contracts.IClientService;
+import domain.exceptions.NotFoundException;
 import presentation.console.Scenario;
 
 import java.math.BigDecimal;
@@ -12,10 +13,10 @@ import java.util.UUID;
  * сценарий ускорения времени
  */
 public class AccelerateTimeScenario extends Scenario {
-    private final IClientService _clientService;
+    private final IClientService clientService;
     public AccelerateTimeScenario(IClientService clientService) {
         super("Accelerate time");
-        _clientService = clientService;
+        this.clientService = clientService;
     }
 
     /**
@@ -30,12 +31,14 @@ public class AccelerateTimeScenario extends Scenario {
         LocalDate date = LocalDate.parse(input);
         UUID id = UUID.fromString(scanner.nextLine());
 
-        BigDecimal money = _clientService.accelerateTime(date, id);
-        if (money != null)
-            System.out.println(money);
+        try {
+            BigDecimal money = clientService.accelerateTime(date, id);
+            if (money != null)
+                System.out.println(money);
+        } catch (NotFoundException exception) {
+            System.out.println(exception.toString());
+        }
 
         scanner.nextLine();
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
     }
 }
